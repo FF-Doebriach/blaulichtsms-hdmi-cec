@@ -1,0 +1,23 @@
+[package]
+name = "blaulichtsms-hdmi-cec"
+version = "0.1.0"
+edition = "2021"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+generic-runtime = {git = "https://github.com/netwatching/project.netwatching.runtime", branch = "main"}
+reqwest = { version = "0.12", features = ["json", "blocking"] }
+tokio = { version = "1.36.*", features = ["full"] }
+crossbeam-channel = "0.5.*"
+tracing-subscriber = "0.3.*"
+log = "0.4.21"
+rand = "0.9.0-alpha.0"
+serde = { version = "1.0.197", features = ["derive"] }
+serde_json = "1.0.*"
+futures-io = { version = "0.3.30" }
+clap_derive = "4.5.4"
+clap = "4.5.4"
+lazy_static = "1.4.0"
+chrono = "0.4.37"
+cec-rs = "7.1.1"
