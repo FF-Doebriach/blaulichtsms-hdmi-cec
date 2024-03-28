@@ -17,7 +17,6 @@ use crate::message::Message;
 
 #[derive(Debug, Clone)]
 pub struct BlaulichtSMSAPI {
-    last_connection: u32,
     config: Config,
     sender: Sender<Message>,
 }
@@ -43,7 +42,7 @@ impl Executor<Message> for BlaulichtSMSAPI {
                         }
                         if most_recent_datetime > (chrono::offset::Utc::now() - Duration::from_secs(5 * 60)) {
                             //return Message::EventOccured;
-                            sender.send(Message::EventOccured).unwrap();
+                            sender.send(Message::EventOccured(most_recent_datetime)).unwrap();
                         }
                     }
                     //info!("{:#?}", json["alarms"][0]["alarmDate"])
@@ -57,7 +56,6 @@ impl Executor<Message> for BlaulichtSMSAPI {
 impl BlaulichtSMSAPI {
     pub fn new(config: Config, sender: Sender<Message>) -> Self {
         Self {
-            last_connection: 0,
             config,
             sender,
         }

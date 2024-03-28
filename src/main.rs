@@ -40,18 +40,20 @@ async fn main() {
     loop {
         receiver.try_iter().for_each(|message| {
             match message {
-                Message::EventOccured => {
-                    let cmd = Command::new("sh")
-                        .arg("-c")
-                        .arg("echo 'on 0.0.0.0' | cec-client -s -d 1")
-                        .output();
-                    if cmd.is_err() {
-                        error!("Could not use cec-client!")
-                    } else {
-                        info!("Turned on TV...")
+                Message::EventOccured(occured_at) => {
+                    if occured_at != last_alarm {
+                        let cmd = Command::new("sh")
+                            .arg("-c")
+                            .arg("echo 'on 0.0.0.0' | cec-client -s -d 1")
+                            .output();
+                        if cmd.is_err() {
+                            error!("Could not use cec-client!")
+                        } else {
+                            info!("Turned on TV...")
+                        }
+                        turned_on = true;
+                        last_alarm = occured_at;
                     }
-                    turned_on = true;
-                    last_alarm = chrono::offset::Utc::now();
                 }
             }
         });
