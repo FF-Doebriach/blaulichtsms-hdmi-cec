@@ -58,7 +58,7 @@ jobs:
           cross build -r --workspace ${{ env.TARGET_FLAGS }}
       - name: Strip release binary (x86)
         if: contains(matrix.target, 'linux') && !contains(matrix.build, 'arm')
-        run: strip "target/${{ matrix.target }}/release/unattended-setups"
+        run: strip "target/${{ matrix.target }}/release/blaulichtsms-hdmi-cec"
       - name: Strip release binary (arm)
         if: contains(matrix.target, 'linux') && contains(matrix.build, 'arm') && matrix.strip != ''
         run: |
@@ -66,15 +66,15 @@ jobs:
             "$PWD/target:/target:Z" \
             rustembedded/cross:${{ matrix.target }} \
             ${{ matrix.strip }} \
-            /target/${{ matrix.target }}/release/unattended-setups
+            /target/${{ matrix.target }}/release/blaulichtsms-hdmi-cec
       - name: Add files to archive
         run: |
-          tar -C ./target/${{ matrix.target }}/release -czvf unattended-setups-${{ matrix.target }}.tar.gz unattended-setups
+          tar -C ./target/${{ matrix.target }}/release -czvf blaulichtsms-hdmi-cec-${{ matrix.target }}.tar.gz blaulichtsms-hdmi-cec
       - name: Upload artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: unattended-setups-${{ matrix.build }}
-          path: unattended-setups-${{ matrix.target }}.tar.gz
+          name: blaulichtsms-hdmi-cec-${{ matrix.build }}
+          path: blaulichtsms-hdmi-cec-${{ matrix.target }}.tar.gz
           retention-days: 7
   release-deploy:
     name: deploy release
