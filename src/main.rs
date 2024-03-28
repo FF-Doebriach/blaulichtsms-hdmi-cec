@@ -1,7 +1,7 @@
 use std::fs::File;
 use std::io::BufReader;
 use std::process::Command;
-use std::time::Duration;
+use tokio::time::{sleep, Duration};
 use clap::Parser;
 use clap_derive::Parser;
 use crossbeam_channel::unbounded;
@@ -35,6 +35,8 @@ async fn main() {
     let api_runner = BlaulichtSMSAPI::new(serde_json::from_reader(config_reader).unwrap(), sender.clone());
     let runner = ModuleRunner::new(Box::new(api_runner), Duration::from_secs(1*60), sender.clone());
     handler.spawn(0, runner);
+    let mut turned_on = false;
+    let mut last_alarm = chrono::offset::Utc::now();
     loop {
         receiver.try_iter().for_each(|message| {
             match message {
@@ -46,9 +48,15 @@ async fn main() {
                     if cmd.is_err() {
                         error!("Could not use cec-client!")
                     }
+                    turned_on = true;
+                    last_alarm = chrono::offset::Utc::now();
                 }
             }
-        })
-
+        });
+        if last_alarm + Duration::from_secs(1*60*60) < chrono::offset::Utc::now() && turned_on {
+            turned_on = false;
+            sleep(Duration::from_secs(10)).await;
+            // TODO: turn TV off here
+        }
     }
 }
