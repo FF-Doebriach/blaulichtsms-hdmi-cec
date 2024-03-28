@@ -1,16 +1,16 @@
-use std::string::ToString;
+
 use std::time::Duration;
 
-use chrono::FixedOffset;
+
 use chrono::prelude::DateTime;
-use crossbeam_channel::{Sender, unbounded};
+use crossbeam_channel::{Sender};
 use generic_runtime::executor::Executor;
-use generic_runtime::handler::Handler;
-use generic_runtime::module_runner::ModuleRunner;
-use log::{info, warn};
-use tokio::runtime::{Handle, Runtime};
-use tokio::task::spawn_blocking;
-use tracing_subscriber::fmt::format;
+
+
+use log::{info};
+use tokio::runtime::{Handle};
+
+
 
 use crate::config::Config;
 use crate::message::Message;
@@ -37,7 +37,7 @@ impl Executor<Message> for BlaulichtSMSAPI {
                         //info!("Current: {}", chrono::offset::Utc::now());
                         for alarm in alarms {
                             let alarm = DateTime::parse_from_rfc3339(alarm["alarmDate"].as_str().expect("Could not parse datetime!")).unwrap().to_utc();
-                            if (alarm > most_recent_datetime) {
+                            if alarm > most_recent_datetime {
                                 most_recent_datetime = alarm;
                             }
                         }
