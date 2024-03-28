@@ -7,7 +7,7 @@ use clap_derive::Parser;
 use crossbeam_channel::unbounded;
 use generic_runtime::handler::Handler;
 use generic_runtime::module_runner::ModuleRunner;
-use log::error;
+use log::{error, info};
 use crate::blaulichtsmsapi::BlaulichtSMSAPI;
 use crate::message::Message;
 
@@ -47,6 +47,8 @@ async fn main() {
                         .output();
                     if cmd.is_err() {
                         error!("Could not use cec-client!")
+                    } else {
+                        info!("Turned on TV...")
                     }
                     turned_on = true;
                     last_alarm = chrono::offset::Utc::now();
@@ -61,6 +63,8 @@ async fn main() {
                 .output();
             if cmd.is_err() {
                 error!("Could not use cec-client!")
+            } else {
+                info!("Turned off tv...")
             }
         }
         sleep(Duration::from_secs(10)).await;
