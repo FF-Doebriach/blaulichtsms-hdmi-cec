@@ -56,7 +56,13 @@ async fn main() {
         if last_alarm + Duration::from_secs(1*60*60) < chrono::offset::Utc::now() && turned_on {
             turned_on = false;
             sleep(Duration::from_secs(10)).await;
-            // TODO: turn TV off here
+            let cmd = Command::new("sh")
+                .arg("-c")
+                .arg("echo 'standby 0.0.0.0' | cec-client -s -d 1 #turn in standby")
+                .output();
+            if cmd.is_err() {
+                error!("Could not use cec-client!")
+            }
         }
     }
 }
