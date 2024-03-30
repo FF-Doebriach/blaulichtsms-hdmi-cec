@@ -1,3 +1,9 @@
 {
-  "blau_licht_sms_api": "MONITOR_API_KEY"
+  "blau_licht_sms_api": "MONITOR_API_KEY",
+  "checking_interval_secs": 60,
+  "turn_off_interval_enabled": true,
+  "turn_off_interval_secs": 3600,
+  "use_hdmi_cec": true,
+  "use_wake_on_lan": false,
+  "wake_on_lan_mac_addr": "AA:BB:CC:DD:EE:FF"
 }

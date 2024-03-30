@@ -9,6 +9,7 @@ use generic_runtime::handler::Handler;
 use generic_runtime::module_runner::ModuleRunner;
 use log::{error, info};
 use crate::blaulichtsmsapi::BlaulichtSMSAPI;
+use crate::config::Config;
 use crate::message::Message;
 
 mod blaulichtsmsapi;
@@ -29,11 +30,12 @@ async fn main() {
     let args = Args::parse();
     let config_file = File::open(args.path).expect("Config file not found!");
     let config_reader = BufReader::new(config_file);
+    let config: Config = serde_json::from_reader(config_reader).unwrap();
     tracing_subscriber::fmt::init(); // enable logging of async
     let (sender, receiver) = unbounded::<Message>();
     let mut handler: Handler<Message> = Handler::new::<>();
-    let api_runner = BlaulichtSMSAPI::new(serde_json::from_reader(config_reader).unwrap(), sender.clone());
-    let runner = ModuleRunner::new(Box::new(api_runner), Duration::from_secs(1*60), sender.clone());
+    let api_runner = BlaulichtSMSAPI::new(config.clone(), sender.clone());
+    let runner = ModuleRunner::new(Box::new(api_runner), Duration::from_secs(config.checking_interval_secs), sender.clone());
     handler.spawn(0, runner);
     let mut turned_on = false;
     let mut last_alarm = chrono::offset::Utc::now();
@@ -42,33 +44,37 @@ async fn main() {
             match message {
                 Message::EventOccured(occured_at) => {
                     if occured_at != last_alarm {
-                        let cmd = Command::new("sh")
-                            .arg("-c")
-                            .arg("echo 'on 0.0.0.0' | cec-client -s -d 1")
-                            .output();
-                        if cmd.is_err() {
-                            error!("Could not use cec-client!")
-                        } else {
-                            info!("Turned on TV...")
+                        if config.use_hdmi_cec {
+                            let cmd = Command::new("sh")
+                                .arg("-c")
+                                .arg("echo 'on 0.0.0.0' | cec-client -s -d 1")
+                                .output();
+                            if cmd.is_err() {
+                                error!("Could not use cec-client!")
+                            } else {
+                                info!("Turned on TV...")
+                            }
+                            turned_on = true;
+                            last_alarm = occured_at;
                         }
-                        turned_on = true;
-                        last_alarm = occured_at;
                     }
                 }
             }
         });
-        if last_alarm + Duration::from_secs(1*60*60) < chrono::offset::Utc::now() && turned_on {
+        if last_alarm + Duration::from_secs(config.turn_off_interval_secs) < chrono::offset::Utc::now() && turned_on && config.turn_off_interval_enabled {
             turned_on = false;
-            let cmd = Command::new("sh")
-                .arg("-c")
-                .arg("echo 'standby 0.0.0.0' | cec-client -s -d 1 #turn in standby")
-                .output();
-            if cmd.is_err() {
-                error!("Could not use cec-client!")
-            } else {
-                info!("Turned off tv...")
+            if config.use_hdmi_cec {
+                let cmd = Command::new("sh")
+                    .arg("-c")
+                    .arg("echo 'standby 0.0.0.0' | cec-client -s -d 1 #turn in standby")
+                    .output();
+                if cmd.is_err() {
+                    error!("Could not use cec-client!")
+                } else {
+                    info!("Turned off tv...")
+                }
             }
         }
-        sleep(Duration::from_secs(10)).await;
+        sleep(Duration::from_secs(5)).await;
     }
 }

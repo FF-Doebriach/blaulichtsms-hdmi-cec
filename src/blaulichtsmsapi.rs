@@ -40,7 +40,7 @@ impl Executor<Message> for BlaulichtSMSAPI {
                                 most_recent_datetime = alarm;
                             }
                         }
-                        if most_recent_datetime > (chrono::offset::Utc::now() - Duration::from_secs(5 * 60)) {
+                        if most_recent_datetime > (chrono::offset::Utc::now() - Duration::from_secs(5 * self.config.checking_interval_secs)) {
                             //return Message::EventOccured;
                             sender.send(Message::EventOccured(most_recent_datetime)).unwrap();
                         }
