@@ -36,7 +36,7 @@ impl Executor<Message> for BlaulichtSMSAPI {
                         //info!("One hour ago: {}", most_recent_datetime);
                         //info!("Current: {}", chrono::offset::Utc::now());
                         for alarm in alarms {
-                            let alarm = DateTime::parse_from_rfc3339(alarm["alarmDate"].as_str().expect("Could not parse datetime!")).unwrap().to_utc();
+                            let alarm = DateTime::parse_from_rfc3339(alarm["alarmDate"].as_str().expect("Could not parse datetime!")).expect("Could not parse date from API!").to_utc();
                             if alarm > most_recent_datetime {
                                 most_recent_datetime = alarm;
                             }
