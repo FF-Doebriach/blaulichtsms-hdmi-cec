@@ -25,6 +25,7 @@ impl Executor<Message> for BlaulichtSMSAPI {
     fn execute(&self) -> Option<Message> {
         let api = self.config.blau_licht_sms_api.clone();
         let sender = self.sender.clone();
+        let checking_interval_secs = self.config.checking_interval_secs;
         info!("Checking...");
         Handle::current().spawn(async move {
             let body = reqwest::get(format!("https://api.blaulichtsms.net/blaulicht/api/alarm/v1/dashboard/{}", api)).await;
@@ -40,7 +41,7 @@ impl Executor<Message> for BlaulichtSMSAPI {
                                 most_recent_datetime = alarm;
                             }
                         }
-                        if most_recent_datetime > (chrono::offset::Utc::now() - Duration::from_secs(5 * self.config.checking_interval_secs)) {
+                        if most_recent_datetime > (chrono::offset::Utc::now() - Duration::from_secs(5 * checking_interval_secs)) {
                             //return Message::EventOccured;
                             sender.send(Message::EventOccured(most_recent_datetime)).unwrap();
                         }
